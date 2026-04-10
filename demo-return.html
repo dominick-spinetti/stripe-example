@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Payment status</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <main class="page narrow">
+    <section class="card">
+      <div class="badge">Return</div>
+      <h1>Payment result</h1>
+      <p id="statusText" class="lead">Checking session status…</p>
+      <div id="details" class="notice hidden"></div>
+
+      <div class="actions">
+        <a class="primary buttonlike" href="./index.html">Back to home</a>
+        <button id="tryAgain" class="secondary hidden">Try again</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./assets/config.js"></script>
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const sessionId = qs.get('session_id');
+
+    const statusText = document.getElementById('statusText');
+    const details = document.getElementById('details');
+    const tryAgain = document.getElementById('tryAgain');
+
+    async function loadStatus() {
+      if (!sessionId) {
+        statusText.textContent = 'No session ID was returned.';
+        return;
+      }
+
+      if (!window.DEMO_CONFIG || !window.DEMO_CONFIG.API_BASE_URL) {
+        statusText.textContent = `Session returned: ${sessionId}`;
+        details.textContent = 'Add API_BASE_URL to fetch the real Stripe test status.';
+        details.classList.remove('hidden');
+        return;
+      }
+
+      const url = `${window.DEMO_CONFIG.API_BASE_URL}/.netlify/functions/session-status?session_id=${encodeURIComponent(sessionId)}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!response.ok) {
+        statusText.textContent = 'Could not retrieve payment status.';
+        details.textContent = data.error || 'Unknown error';
+        details.classList.remove('hidden');
+        return;
+      }
+
+      if (data.status === 'complete') {
+        statusText.textContent = 'Payment succeeded.';
+        details.textContent = `Customer email: ${data.customer_email || 'n/a'}`;
+        details.classList.remove('hidden');
+      } else {
+        statusText.textContent = 'Payment not completed.';
+        details.textContent = 'The session is still open or was canceled.';
+        details.classList.remove('hidden');
+        tryAgain.classList.remove('hidden');
+      }
+    }
+
+    tryAgain.addEventListener('click', () => {
+      history.back();
+    });
+
+    loadStatus();
+  </script>
+</body>
+</html>
