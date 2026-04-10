@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Demo payment</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <main class="page narrow">
+    <a href="./index.html" class="backlink">← Back</a>
+
+    <section class="card">
+      <div class="badge">Payment</div>
+      <h1>Complete a test payment</h1>
+      <p id="summary" class="lead"></p>
+
+      <div class="demo-box">
+        <div class="row between">
+          <strong>Embedded Checkout</strong>
+          <span id="modePill" class="pill">loading</span>
+        </div>
+
+        <div id="checkoutNotice" class="notice hidden"></div>
+        <div id="checkout" class="checkout-shell"></div>
+      </div>
+
+      <div class="actions">
+        <button id="retryButton" class="secondary hidden">Retry payment</button>
+      </div>
+
+      <details class="tips">
+        <summary>Test card</summary>
+        <p>Use 4242 4242 4242 4242 with any future expiry, any 3-digit CVC, and any postal code.</p>
+      </details>
+    </section>
+  </main>
+
+  <script src="./assets/config.js"></script>
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const orderId = qs.get('orderId') || 'POC-1001';
+    const email = qs.get('email') || 'jenny.rosen@example.com';
+    const customerName = qs.get('customerName') || 'Jenny Rosen';
+    const amount = qs.get('amount') || '25.00';
+
+    document.getElementById('summary').textContent =
+      `Order ${orderId} · ${customerName} · ${email} · $${amount}`;
+
+    const checkoutNotice = document.getElementById('checkoutNotice');
+    const checkoutContainer = document.getElementById('checkout');
+    const retryButton = document.getElementById('retryButton');
+    const modePill = document.getElementById('modePill');
+
+    let checkoutInstance = null;
+
+    async function startEmbeddedCheckout() {
+      checkoutNotice.classList.add('hidden');
+      retryButton.classList.add('hidden');
+      checkoutContainer.innerHTML = '';
+
+      if (!window.DEMO_CONFIG || !window.DEMO_CONFIG.API_BASE_URL) {
+        modePill.textContent = 'mock-only';
+        checkoutNotice.textContent =
+          'Set API_BASE_URL in assets/config.js and deploy the Netlify functions to use live Stripe test mode.';
+        checkoutNotice.classList.remove('hidden');
+        return;
+      }
+
+      modePill.textContent = 'stripe test';
+
+      try {
+        const stripe = Stripe(window.DEMO_CONFIG.STRIPE_PUBLISHABLE_KEY);
+
+        const fetchClientSecret = async () => {
+          const response = await fetch(
+            `${window.DEMO_CONFIG.API_BASE_URL}/.netlify/functions/create-checkout-session`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId,
+                email,
+                customerName,
+                amount
+              })
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to create session');
+          }
+
+          return data.clientSecret;
+        };
+
+        checkoutInstance = await stripe.createEmbeddedCheckoutPage({
+          fetchClientSecret
+        });
+
+        checkoutInstance.mount('#checkout');
+      } catch (err) {
+        checkoutNotice.textContent = err.message || 'Could not load checkout.';
+        checkoutNotice.classList.remove('hidden');
+        retryButton.classList.remove('hidden');
+      }
+    }
+
+    retryButton.addEventListener('click', async () => {
+      if (checkoutInstance && checkoutInstance.destroy) {
+        checkoutInstance.destroy();
+      }
+      await startEmbeddedCheckout();
+    });
+
+    startEmbeddedCheckout();
+  </script>
+</body>
+</html>
