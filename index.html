@@ -3,21 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CXone Guide + Stripe POC</title>
+  <title>CXone Guide + Santander POC</title>
   <link rel="stylesheet" href="./assets/styles.css" />
 </head>
 <body>
   <main class="page">
     <section class="hero">
       <div class="badge">Demo POC</div>
-      <h1>CXone Guide + Stripe test payment</h1>
+      <h1>CXone Guide launches Santander bank payment</h1>
       <p class="lead">
-        This page hosts the Guide widget and a demo payment launcher.
+        Guide starts the flow. Your site opens a payment modal, then redirects to Santander.
       </p>
 
       <div class="card">
-        <h2>Quick test</h2>
-        <p>Launch the payment page directly or use Guide to send people there.</p>
+        <h2>Manual test controls</h2>
 
         <div class="grid">
           <label>
@@ -42,31 +41,55 @@
         </div>
 
         <div class="actions">
-          <button id="openPaymentPage" class="primary">Open payment page</button>
+          <button id="launchPaymentModal" class="primary">Open Santander modal</button>
+          <button id="copyGuideLink" class="secondary">Copy Guide payment URL</button>
           <button id="openGuide" class="secondary">Open Guide</button>
         </div>
 
-        <p class="hint">
-          Tip: once your Guide channel is ready, the bot button can send users to the same payment page URL.
-        </p>
+        <p id="guideLinkPreview" class="hint"></p>
       </div>
     </section>
   </main>
 
+  <div id="paymentModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="row between">
+        <strong>Pay by bank</strong>
+        <button id="closePaymentModal" class="secondary">Close</button>
+      </div>
+
+      <div class="bank-header">
+        <div class="bank-badge">Santander</div>
+        <p class="lead">You’ll be redirected to Santander to review and approve the payment.</p>
+      </div>
+
+      <p id="paymentSummary" class="lead"></p>
+      <div id="checkoutNotice" class="notice hidden"></div>
+
+      <div class="bank-panel">
+        <div class="bank-row"><span>Provider</span><strong>Santander</strong></div>
+        <div class="bank-row"><span>Payment type</span><strong>Open Banking payment</strong></div>
+        <div class="bank-row"><span>Flow</span><strong>Redirect + consent</strong></div>
+      </div>
+
+      <div class="actions">
+        <button id="continueToBank" class="primary">Continue to Santander</button>
+      </div>
+    </div>
+  </div>
+
   <script src="./assets/config.js"></script>
   <script src="./assets/site.js"></script>
 
-<script>
-(function(n,u){
-    window.CXoneDfo=n,
-    window[n]=window[n]||function(){(window[n].q=window[n].q||[]).push(arguments)},window[n].u=u,
-    e=document.createElement("script"),e.type="module",e.src=u+"?"+Math.round(Date.now()/1e3/3600),
-    document.head.appendChild(e)
-    })('cxone','https://web-modules-de-na1.niceincontact.com/loader/1/loader.js');
-
-cxone('init', '1792');
-cxone('guide','init');
-</script>
-  
+  <!-- Paste your real tenant-specific Guide embed code here -->
+  <!--
+  <script>
+    cxone('init', '1234');
+    cxone('guide', 'init', {
+      templateId: 'YOUR_TEMPLATE_ID',
+      resetRulesOnNewPage: true
+    });
+  </script>
+  -->
 </body>
 </html>
