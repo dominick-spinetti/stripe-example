@@ -10,67 +10,37 @@
   <main class="page narrow">
     <section class="card">
       <div class="badge">Return</div>
-      <h1>Payment result</h1>
-      <p id="statusText" class="lead">Checking session status…</p>
+      <h1>Bank payment result</h1>
+      <p id="statusText" class="lead">Checking result…</p>
       <div id="details" class="notice hidden"></div>
 
       <div class="actions">
         <a class="primary buttonlike" href="./index.html">Back to home</a>
-        <button id="tryAgain" class="secondary hidden">Try again</button>
       </div>
     </section>
   </main>
 
-  <script src="./assets/config.js"></script>
   <script>
     const qs = new URLSearchParams(location.search);
-    const sessionId = qs.get('session_id');
+    const provider = qs.get('provider') || 'santander';
+    const status = qs.get('status') || 'unknown';
+    const orderId = qs.get('orderId') || 'POC-1001';
+    const amount = qs.get('amount') || '25.00';
 
     const statusText = document.getElementById('statusText');
     const details = document.getElementById('details');
-    const tryAgain = document.getElementById('tryAgain');
 
-    async function loadStatus() {
-      if (!sessionId) {
-        statusText.textContent = 'No session ID was returned.';
-        return;
-      }
-
-      if (!window.DEMO_CONFIG || !window.DEMO_CONFIG.API_BASE_URL) {
-        statusText.textContent = `Session returned: ${sessionId}`;
-        details.textContent = 'Add API_BASE_URL to fetch the real Stripe test status.';
-        details.classList.remove('hidden');
-        return;
-      }
-
-      const url = `${window.DEMO_CONFIG.API_BASE_URL}/.netlify/functions/session-status?session_id=${encodeURIComponent(sessionId)}`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!response.ok) {
-        statusText.textContent = 'Could not retrieve payment status.';
-        details.textContent = data.error || 'Unknown error';
-        details.classList.remove('hidden');
-        return;
-      }
-
-      if (data.status === 'complete') {
-        statusText.textContent = 'Payment succeeded.';
-        details.textContent = `Customer email: ${data.customer_email || 'n/a'}`;
-        details.classList.remove('hidden');
-      } else {
-        statusText.textContent = 'Payment not completed.';
-        details.textContent = 'The session is still open or was canceled.';
-        details.classList.remove('hidden');
-        tryAgain.classList.remove('hidden');
-      }
+    if (status === 'success') {
+      statusText.textContent = 'Payment approved.';
+      details.textContent = `Provider: ${provider} · Order: ${orderId} · Amount: $${amount}`;
+      details.classList.remove('hidden');
+    } else if (status === 'cancelled') {
+      statusText.textContent = 'Payment was cancelled.';
+      details.textContent = `Provider: ${provider} · Order: ${orderId}`;
+      details.classList.remove('hidden');
+    } else {
+      statusText.textContent = 'Payment result not available.';
     }
-
-    tryAgain.addEventListener('click', () => {
-      history.back();
-    });
-
-    loadStatus();
   </script>
 </body>
 </html>
