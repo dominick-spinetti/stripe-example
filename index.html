@@ -56,15 +56,17 @@
   <script src="./assets/config.js"></script>
   <script src="./assets/site.js"></script>
 
-  <!-- Replace this with your tenant-specific embed code from Guide > Integrations -->
-  <!--
-  <script>
-    cxone('init', '1234');
-    cxone('guide', 'init', {
-      templateId: 'YOUR_TEMPLATE_ID',
-      resetRulesOnNewPage: true
-    });
-  </script>
-  -->
+<script>
+(function(n,u){
+    window.CXoneDfo=n,
+    window[n]=window[n]||function(){(window[n].q=window[n].q||[]).push(arguments)},window[n].u=u,
+    e=document.createElement("script"),e.type="module",e.src=u+"?"+Math.round(Date.now()/1e3/3600),
+    document.head.appendChild(e)
+    })('cxone','https://web-modules-de-na1.niceincontact.com/loader/1/loader.js');
+
+cxone('init', '1792');
+cxone('guide','init');
+</script>
+  
 </body>
 </html>
