@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Santander demo consent</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <main class="page narrow">
+    <section class="card">
+      <div class="badge">Demo bank page</div>
+      <h1>Santander consent simulation</h1>
+      <p class="lead">
+        This is a mock bank page to simulate the real Santander redirect and consent step.
+      </p>
+
+      <div class="bank-panel">
+        <div class="bank-row"><span>Bank</span><strong>Santander</strong></div>
+        <div class="bank-row"><span>Order ID</span><strong id="orderId"></strong></div>
+        <div class="bank-row"><span>Amount</span><strong id="amount"></strong></div>
+        <div class="bank-row"><span>Email</span><strong id="email"></strong></div>
+      </div>
+
+      <div class="actions">
+        <button id="approve" class="primary">Approve payment</button>
+        <button id="decline" class="secondary">Decline</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const orderId = qs.get('orderId') || 'POC-1001';
+    const amount = qs.get('amount') || '25.00';
+    const email = qs.get('email') || 'jenny.rosen@example.com';
+
+    document.getElementById('orderId').textContent = orderId;
+    document.getElementById('amount').textContent = `$${amount}`;
+    document.getElementById('email').textContent = email;
+
+    document.getElementById('approve').addEventListener('click', () => {
+      location.href =
+        `./demo-return.html?provider=santander&status=success&orderId=${encodeURIComponent(orderId)}&amount=${encodeURIComponent(amount)}`;
+    });
+
+    document.getElementById('decline').addEventListener('click', () => {
+      location.href =
+        `./demo-return.html?provider=santander&status=cancelled&orderId=${encodeURIComponent(orderId)}&amount=${encodeURIComponent(amount)}`;
+    });
+  </script>
+</body>
+</html>
